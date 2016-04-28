@@ -1,0 +1,4 @@
+{{ object.title }}
+{{ object.description }}
+{{ object.teacher_additional_resources }}
+{{ object.tags }}

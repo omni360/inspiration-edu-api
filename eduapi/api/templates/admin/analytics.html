@@ -1,0 +1,105 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls admin_static admin_list %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <style type="text/css">
+        .children-bulk { width: 400px; height: 200px; }
+        .children-list-table { table-layout: fixed; }
+        .children-list-table > tbody > tr > td { padding: 5px 10px; }
+        .children-list-table > tbody > tr > td.child-username { font-weight: bold; }
+        .children-list-table > tbody > tr > td.child-lookup { font-style: italic; }
+        .children-list-table > tbody > tr > td.child-info { color: #999; }
+        .children-list-table > tbody > tr > td.child-remove { text-align: right; color: #999; }
+        .children-list-table > tbody > tr > td.child-moderator-type {}
+        .children-list-table > tbody > tr > td.child-status { color: #999; }
+        .children-list-table > tbody > tr.error > td.child-username { font-weight: normal; }
+        .children-list-table select { width: 100%; }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div>
+        <div></div>
+        <table class="table table-bordered children-list-table">
+            <tr>
+                <th>Month:</th>
+                {% for month, stat in classroom_stats %}
+                <th>{{ month }}</th>
+                {% endfor %}
+            </tr>
+            <tr>
+                <td>Classroom Created</td>
+                {% for month, stat in classroom_stats %}
+                <td>{{ stat }}</td>
+                {% endfor %}
+            </tr>
+            <tr>
+                <td>New Users</td>
+                {% for month, stat in user_stats %}
+                <td>{{ stat }}</td>
+                {% endfor %}
+            </tr>
+            <tr>
+                <td>
+                    Unique Projects Started<br />
+                    <small>out of all published projects</small>
+                </td>
+                {% for month, stat in unique_projects_started %}
+                <td>{{ stat }}</td>
+                {% endfor %}
+            </tr>
+            <tr>
+                <td>
+                    Unique Projects Completed<br />
+                    <small>out of all published projects</small>
+                </td>
+                {% for month, stat in unique_projects_completed %}
+                <td>{{ stat }}</td>
+                {% endfor %}
+            </tr>
+            <tr>
+                <td>
+                    Projects Started<br />
+                    <small>Every time a user started a project</small>
+                </td>
+                {% for month, stat in projects_started_stats %}
+                <td>{{ stat }}</td>
+                {% endfor %}
+            </tr>
+            <tr>
+                <td>
+                    Projects Completed<br />
+                    <small>Every time a user completed a project</small>
+                </td>
+                {% for month, stat in projects_completed_stats %}
+                <td>{{ stat }}</td>
+                {% endfor %}
+            </tr>
+            <tr>
+                <td>Users that created classrooms</td>
+                {% for month, stat in user_that_created_classrooms_stats %}
+                <td>{{ stat }}</td>
+                {% endfor %}
+            </tr>
+            <tr>
+                <td>Users that created classrooms for the first time</td>
+                {% for month, stat in user_that_created_first_classrooms_stats %}
+                <td>{{ stat }}</td>
+                {% endfor %}
+            </tr>
+            <tr>
+                <td>New Parents</td>
+                {% for month, stat in new_parents_stats %}
+                <td>{{ stat }}</td>
+                {% endfor %}
+            </tr>
+            <tr>
+                <td>New Teachers</td>
+                {% for month, stat in new_teachers_stats%}
+                <td>{{ stat }}</td>
+                {% endfor %}
+            </tr>
+        </table>
+    </div>
+{% endblock %}

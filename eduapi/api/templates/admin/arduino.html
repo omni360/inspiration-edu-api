@@ -1,0 +1,70 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls admin_static admin_list %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <style type="text/css">
+        .children-bulk { width: 400px; height: 200px; }
+        .children-list-table { table-layout: fixed; }
+        .children-list-table > tbody > tr > td { padding: 5px 10px; }
+        .children-list-table > tbody > tr > td.child-username { font-weight: bold; }
+        .children-list-table > tbody > tr > td.child-lookup { font-style: italic; }
+        .children-list-table > tbody > tr > td.child-info { color: #999; }
+        .children-list-table > tbody > tr > td.child-remove { text-align: right; color: #999; }
+        .children-list-table > tbody > tr > td.child-moderator-type {}
+        .children-list-table > tbody > tr > td.child-status { color: #999; }
+        .children-list-table > tbody > tr.error > td.child-username { font-weight: normal; }
+        .children-list-table select { width: 100%; }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div>
+        <div></div>
+        <table class="table table-bordered children-list-table">
+            <tr>
+                <th>Month:</th>
+                {% for month, stat in arduino_purchases %}
+                <th>{{ month }}</th>
+                {% endfor %}
+            </tr>
+            <tr>
+                <td>Arduino Purchases</td>
+                {% for month, stat in arduino_purchases %}
+                <td>{{ stat }}</td>
+                {% endfor %}
+            </tr>
+            <tr>
+                <td>Users Starting Arduino Projects</td>
+                {% for month, stat in users_starting_arduino_projects_stats %}
+                <td>{{ stat }}</td>
+                {% endfor %}
+            </tr>
+            <tr>
+                <td>Users Starting Arduino Free Projects <small>(ids: {{ arduino_free_projects_ids }})</small></td>
+                {% for month, stat in users_starting_arduino_free_projects_stats %}
+                <td>{{ stat }}</td>
+                {% endfor %}
+            </tr>
+        </table>
+    </div>
+    <div>
+        <h3>Users Learning Arduino Projects</h3>
+        <table class="table table-bordered children-list-table">
+            <tr>
+                <th width="10%">ID</th>
+                <th>Project</th>
+                <th>Total Users Started</th>
+                <th>Total Users Completed</th>
+            </tr>
+            {% for arduino_project_stats in arduino_projects_stats %}
+            <tr>
+                <td>{{ arduino_project_stats.id }}</td>
+                <td>{{ arduino_project_stats.title }}</td>
+                <td>{{ arduino_project_stats.total_users_started }}</td>
+                <td>{{ arduino_project_stats.total_users_completed }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+{% endblock %}

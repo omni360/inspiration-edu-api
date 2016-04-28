@@ -1,0 +1,2 @@
+{{ object.project_id }}
+{{ object.title }}

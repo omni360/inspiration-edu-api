@@ -1,0 +1,184 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls admin_static admin_list %}
+
+{% block extrahead %}
+    {{ block.super }}
+    {{ arduino_media }}
+{% endblock %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <style type="text/css">
+        .users-perms-table { table-layout: fixed; }
+        .users-perms-table > tbody > tr > td { padding: 5px 10px; }
+        .users-perms-table > tbody > tr > td.username { font-weight: bold; }
+        .users-perms-table > tbody > tr > td.permission {}
+        .users-perms-table > tbody > tr > td.permission .send-email-info { color: #999; }
+        .users-perms-table > tbody > tr > td.remove-user { text-align: right; color: #999; }
+        .users-perms-table > tbody > tr > td.status { color: #999; }
+        .users-perms-table > tbody > tr > td.arduino-projects .arduino-projects-list-box { max-height:250px; overflow:auto; border:1px solid #ccc; }
+        .users-perms-table > tbody > tr > td.arduino-projects label { display: inline-block; margin-bottom: 2px; }
+        .users-perms-table > tbody > tr.error > td.username { font-weight: normal; }
+        .users-perms-table select { width: 100%; }
+        .users-perms-table > tbody > tr > td.new-user { padding: 0; }
+        .users-perms-table > tbody > tr > td.new-user fieldset { border-radius: 0; }
+    </style>
+{% endblock %}
+
+{% block extrajs %}
+    {{ block.super }}
+    <script type="application/javascript">
+        function setSendEmailCheckbox(selectPermissionElem, checkboxId) {
+            checkboxElem = document.getElementById(checkboxId);
+            if (selectPermissionElem.options[selectPermissionElem.selectedIndex].value == '{{ arduino_purchase_permission_teacher }}') {
+                checkboxElem.disabled = false;
+                checkboxElem.checked = false;
+            }
+            else {
+                checkboxElem.disabled = true;
+                checkboxElem.checked = false;
+            }
+        }
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="alert alert-warning">
+        <b>Important:</b>
+        <br />This page can be used to give permissions to the Arduino Kit's projects.
+        <br />In order to remove permissions or to undo an action, you'll need to contact the team.
+    </div>
+
+    <h2>Arduino Kit Permissions</h2>
+
+    <br />
+    <br />
+    <h4>First, choose the users who should gain access to the projects</h4>
+
+    <form action="{% url 'admin-custom:arduino-kit-perms' %}" method="POST" enctype="application/json" class="form-horizontal">
+        {% csrf_token %}
+        <table id="projects_list" class="table table-bordered users-perms-table">
+            <thead>
+                <tr>
+                    <th style="width: 25%;">User Name</th>
+                    <th style="width: 20%;">Permission</th>
+                    <th style="width: 45%;">Projects</th>
+                    <th style="width: 10%;">Remove</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user_perm in arduino_users_perms %}
+                {% if user_perm.confirmed %}
+                <tr>
+                    <td class="username">
+                        <input type="hidden" name="users_ids[]" value="{{user_perm.id}}">
+                        <input type="hidden" name="users_perms[{{user_perm.id}}][confirmed]" value="true">
+                        {{ user_perm.name }}
+                    </td>
+                    <td class="permission">
+                        {% for purchase_permission_key, purchase_permission_value in arduino_purchase_permissions %}
+                            {% if user_perm.permission == purchase_permission_key %}
+                            <input type="hidden" name="users_perms[{{user_perm.id}}][permission]" value="{{user_perm.permission}}">
+                            {{ purchase_permission_value }}
+                            {% if user_perm.send_email %}
+                            <br/>
+                            <input type="hidden" name="users_perms[{{user_perm.id}}][send_email]" value="true">
+                            <small class="send-email-info">[email &quot;Arduino Kit Purchase&quot; was sent]</small>
+                            {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td class="arduino-projects">
+                        <small>[<a href="#arduino-projects-list-{{user_perm.id}}" data-toggle="collapse">show/hide projects</a>]</small>
+                        <div id="arduino-projects-list-{{user_perm.id}}" class="collapse">
+                            <div class="arduino-projects-list-box">
+                            {% for arduino_project in arduino_projects %}
+                            {% if arduino_project.id in user_perm.projects %}
+                                <input type="hidden" name="users_perms[{{user_perm.id}}][projects][]" value="{{arduino_project.id}}">
+                                <i class="icon-check"></i>
+                            {% else %}
+                                <i class="icon-check-empty"></i>
+                            {% endif %}
+                            {{ arduino_project.title }}
+                            <br />
+                            {% endfor %}
+                            </div>
+                        </div>
+                    </td>
+                    <td class="remove-user"><span class="text-success">Done!</span></td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td class="username">
+                        <input type="hidden" name="users_ids[]" value="{{user_perm.id}}">
+                        {{ user_perm.name }}
+                    </td>
+                    <td class="permission">
+                        <select name="users_perms[{{user_perm.id}}][permission]"
+                                onchange="setSendEmailCheckbox(this, 'users-perms-{{user_perm.id}}-email-checkbox')">
+                            {% for purchase_permission_key, purchase_permission_value in arduino_purchase_permissions %}
+                            <option value="{{ purchase_permission_key }}"
+                                    {% if user_perm.permission == purchase_permission_key %}selected="selected"{% endif %}>
+                                {{ purchase_permission_value }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <label for="users-perms-{{user_perm.id}}-email-checkbox">
+                            <input type="checkbox" name="users_perms[{{user_perm.id}}][send_email]" value="true"
+                                   id="users-perms-{{user_perm.id}}-email-checkbox"
+                                   {% if user_perm.permission != arduino_purchase_permission_teacher %}disabled{% elif user_perm.send_email %}checked{% endif %}>
+                            send &quot;Arduino Kit Purchase&quot; email?
+                        </label>
+                    </td>
+                    <td class="arduino-projects">
+                        <small>[<a href="#arduino-projects-list-{{user_perm.id}}" data-toggle="collapse">show/hide projects</a>]</small>
+                        <div id="arduino-projects-list-{{user_perm.id}}" class="collapse">
+                            <div class="arduino-projects-list-box">
+                            {# NOTE: Show only bundled Arduino projects (not all bundled projects, nor all Arduino projects) #}
+                            {% for arduino_project in arduino_projects %}
+                            <input type="checkbox"
+                                   id="user-{{user_perm.id}}-project-{{arduino_project.id}}"
+                                   name="users_perms[{{user_perm.id}}][projects][]"
+                                   value="{{arduino_project.id}}"
+                                   {% if arduino_project.id in user_perm.projects %}checked="checked"{% endif %}>
+                            <label for="user-{{user_perm.id}}-project-{{arduino_project.id}}">{{ arduino_project.title }}</label>
+                            <br />
+                            {% endfor %}
+                            </div>
+                        </div>
+                    </td>
+                    <td class="remove-user">
+                        <a href="javascript:;" onclick="javascript:$(this).closest('tr').remove();">[X]</a>
+                    </td>
+                </tr>
+                {% endif %}
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="status">- empty -</td>
+                </tr>
+                {% endfor %}
+                <tr>
+                    <td colspan="5" class="new-user">
+                        <fieldset class="module aligned first">
+                            <div class="control-group">
+                                <div class="control-label"><i class="icon-plus" style="vertical-align: top;"></i> Add Another User:</div>
+                                <div class="controls">
+                                    {{ arduino_add_new_user_field }}
+                                    <button type="submit" name="action" value="add" class="btn">Add</button>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <a href="{% url 'admin-custom:arduino-kit-perms' %}">[Reset permissions list]</a>
+
+        <br />
+        <br />
+        <h4>When done - "confirm", and the users will gain access</h4>
+        <button type="submit" name="action" value="confirm" class="btn btn-success">Confirm</button>
+    </form>
+
+
+{% endblock %}

@@ -1,0 +1,2 @@
+#!/bin/sh
+DJANGO_SETTINGS_MODULE="eduapi.settings_test_fast" python manage.py test $*

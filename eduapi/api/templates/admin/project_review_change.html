@@ -1,0 +1,265 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls admin_static admin_list %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <style type="text/css">
+        .new-version-diff { line-height: 14px; }
+        .new-version-diff-fields { font-size: 10px; line-height: 12px; color: #999; }
+        .table tr td.bad-word-col { color: #cc0000; }
+        .table tr td.bad-word-another-case-col { border-top: none; }
+        .bad-word-highlight { color: #cc0000; background-color: #ffcccc; }
+    </style>
+{% endblock %}
+
+{% block content %}
+    {% if has_changed_publish_mode %}
+        {% if project.publish_mode == 'published' %}
+            <div class="alert alert-success">
+                Project &quot;{{ project.title }}&quot; was approved and published immediately!
+            </div>
+        {% elif project.publish_mode == 'ready' %}
+            <div class="alert alert-success">
+                Project &quot;{{ project.title }}&quot; was approved and will be published in {{ project.min_publish_date | timeuntil }} (on {{ project.min_publish_date | date:'Y-m-d H:i' }}).
+            </div>
+        {% elif project.publish_mode == 'edit' %}
+            <div class="alert alert-warning">
+                Project &quot;{{ project.title }}&quot; was declined and returned to edit mode.
+            </div>
+        {% endif %}
+    {% endif %}
+
+    <h2>Review Project</h2>
+    <div class="form-horizontal">
+        <fieldset class="module aligned first">
+            <div class="control-group">
+                <div class="control-label">ID:</div>
+                <div class="controls">{{ project.id }}</div>
+            </div>
+            <div class="control-group">
+                <div class="control-label">Title:</div>
+                <div class="controls">
+                    <b><a href="{{ project_external_view_url }}" target="_blank">{{ project.title }}</a></b>
+                    <span class="help-block">[<a href="{% url 'admin:api_project_change' project.id %}">Admin Edit</a>]</span>
+                </div>
+            </div>
+            <div class="control-group">
+                <div class="control-label">Owner:</div>
+                <div class="controls">{{ project.owner.name }}</div>
+            </div>
+            <div class="control-group">
+                <div class="control-label">Last updated:</div>
+                <div class="controls">{{ project.updated | date:'Y-m-d H:i' }} <span class="help-inline">[created on {{ project.added | date:'Y-m-d H:i' }}]</span></div>
+            </div>
+            <div class="control-group">
+                {% with publish_time_remaining=project.min_publish_date|timeuntil %}
+                <div class="control-label">Minimum publish date:</div>
+                <div class="controls">
+                    {{ project.min_publish_date | date:'Y-m-d H:i' | default:'None' }}
+                    {% if publish_time_remaining and publish_time_remaining.0 != '0' %}
+                        <span class="help-inline">[{{ publish_time_remaining }}]</span>
+                    {% else %}
+                        <span class="help-inline">[Immediate]</span>
+                    {% endif %}
+                </div>
+                {% endwith %}
+            </div>
+            <div class="control-group">
+                <div class="control-label">Publish mode:</div>
+                <div class="controls">
+                    {% for publish_mode_key, publish_mode_text in publish_modes.items %}
+                        {% if project.publish_mode == publish_mode_key %}{{ publish_mode_text }}{% endif %}
+                    {% endfor %}
+                    {% if project.has_draft %}<span class="help-inline">[A new version is awaiting approval]</span>{% endif %}
+                </div>
+            </div>
+            {% if project.publish_mode == 'published' and project.has_draft %}
+            <div class="control-group">
+                <div class="control-label">New Version Changes:</div>
+                <div class="controls">
+                    <small>[<a href="#new-version-diff-data" data-toggle="collapse">show/hide new version changes</a>]</small>
+                    <div id="new-version-diff-data" class="new-version-diff collapse">
+                    {{ project.title }}<br/>
+                    <span class="new-version-diff-fields">{{ project.draft_diff_fields | default:'' }}</span>
+                    <ul>
+                    {% for lesson in project.lessons.all %}
+                        {% if lesson.has_draft %}
+                        <li class="new-version-diff">
+                            {{ lesson.title }}<br/>
+                            <span class="new-version-diff-fields">{{ lesson.draft_diff_fields | default:'' }}</span>
+                            <ul>
+                            {% for step in lesson.steps.all %}
+                                {% if step.has_draft %}
+                                    <li class="new-version-diff">
+                                        {{ step.title }}<br/>
+                                        <span class="new-version-diff-fields">{{ step.draft_diff_fields | default:'' }}</span>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                            </ul>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                    </ul>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </fieldset>
+    </div>
+
+    <br>
+
+    <h2>Notifications History ({{ project_notifications | length }}) <small>[<a href="#notifications_history_sect" data-toggle="collapse">+/-</a>]</small></h2>
+    <div class="form-horizontal collapse" id="notifications_history_sect">
+        <fieldset class="module aligned first">
+            {% if project_notifications %}
+                <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th style="width: 15%;">Date</th>
+                    <th style="width: 15%;">Publish Mode</th>
+                    <th style="width: 15%;">By User</th>
+                    <th style="width: 25%;">Description</th>
+                    <th style="width: 30%;">Feedback</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for project_notification in project_notifications %}
+                <tr>
+                    <td>
+                        {{ project_notification.timestamp | date:'Y-m-d H:i' }}
+                    </td>
+                    <td>
+                        {% if project_notification.verb == 'project_draft_mode_changed_by_target' %}
+                            {{ publish_modes.published }}
+                            <i class="icon-arrow-right"></i>
+                            New Version Applied
+                        {% elif project_notification.verb == 'project_draft_mode_changed_by_target_with_feedback' %}
+                            {{ publish_modes.published }}
+                            <i class="icon-arrow-right"></i>
+                            New Version Rejected
+                        {% else %}
+                            {% for publish_mode_key, publish_mode_text in publish_modes.items %}
+                                {% if project_notification.data.oldPublishMode == publish_mode_key %}{{ publish_mode_text }}{% endif %}
+                            {% endfor %}
+                            <i class="icon-arrow-right"></i>
+                            {% for publish_mode_key, publish_mode_text in publish_modes.items %}
+                                {% if project_notification.data.publishMode == publish_mode_key %}{{ publish_mode_text }}{% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {{ project_notification.target.name }}
+                    </td>
+                    <td>
+                        {{ project_notification.description }}
+                    </td>
+                    <td>
+                        {% if project_notification.data.feedback %}
+                        {{ project_notification.data.feedback | linebreaks }}
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+                </table>
+            {% else %}
+                <div class="control-group">
+                    <div class="controls">
+                    - empty -
+                    </div>
+                </div>
+            {% endif %}
+        </fieldset>
+    </div>
+
+    <br>
+
+    <h2>Bad words in project ({{ bad_words_list|length }}) <small>[<a href="#bad_words_history_sect" data-toggle="collapse">+/-</a>]</small></h2>
+    <div class="form-horizontal collapse" id="bad_words_history_sect">
+        <fieldset class="module aligned first">
+            {% if bad_words_list %}
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th style="width: 25%;">Found in</th>
+                        <th style="width: 25%;">Bad word</th>
+                        <th style="width: 50%;">Sentence</th>
+                    </tr>
+                </thead>
+                {% for bad_word_item in bad_words_list %}
+                    {% for bad_word_case in bad_word_item.cases %}
+                        <tr>
+                            {% if forloop.first %}
+                            <td>
+                                {{ bad_word_item.ref_key }}
+                                {% if bad_word_item.ref_title %}
+                                    <br><span class="help-inline">[{{ bad_word_item.ref_title }}]</span>
+                                {% endif %}
+                            </td>
+                            {% else %}
+                            <td class="bad-word-another-case-col"></td>
+                            {% endif %}
+                            <td class="bad-word-col">
+                                {{ bad_word_case.bad_words|join:", " }}
+                            </td>
+                            <td>
+                                {{ bad_word_case.safe_highlighted_sentence }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% endfor %}
+            </table>
+            {% else %}
+            <div class="control-group">
+                <div class="controls">
+                - empty -
+                </div>
+            </div>
+            {% endif %}
+        </fieldset>
+    </div>
+
+    <br>
+
+    {% if not has_changed_publish_mode %}
+    <h2>Approve Or Decline The Reviewed Project</h2>
+    <form action="{% url 'admin-custom:project-review-change' project.id %}" method="POST" class="form-horizontal">
+        {% csrf_token %}
+        <input type="hidden" name="changePublishMode" value="ready">
+        <fieldset class="module aligned first">
+            <div class="control-group">
+                <div class="control-label">Approve (publish):</div>
+                <div class="controls">
+                    <button type="submit" class="btn btn-success"><i class="icon-ok-sign icon-white"></i> Approve</button>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+    <form action="{% url 'admin-custom:project-review-change' project.id %}" method="POST" class="form-horizontal">
+        {% csrf_token %}
+        <input type="hidden" name="changePublishMode" value="edit">
+        <fieldset class="module aligned first">
+            <div class="control-group">
+                <div class="control-label" for="review_feedback">Feedback:</div>
+                <div class="controls">
+                    {% if form.errors %}
+                        {{ form.non_field_errors }}
+                    {% endif %}
+                    {{ form.review_feedback }}
+                </div>
+            </div>
+            <div class="control-group">
+                <div class="control-label">Decline (return to edit):</div>
+                <div class="controls">
+                    <button type="submit" class="btn btn-warning"><i class="icon-remove-sign icon-white"></i> Decline</button>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+    {% endif %}
+
+    [ <a href="{% url 'admin-custom:projects-review-changelist' %}">See All Projects in Review Mode</a> ]
+
+{% endblock %}

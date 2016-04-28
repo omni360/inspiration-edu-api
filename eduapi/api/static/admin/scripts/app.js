@@ -1,0 +1,1 @@
+angular.module('adminApp', ['ui.bootstrap.modal', 'filePickerApp']);

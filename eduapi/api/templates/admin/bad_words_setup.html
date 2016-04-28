@@ -1,0 +1,31 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls admin_static admin_list %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <style type="text/css">
+        .bad-words-textarea { width: 400px; height: 200px; }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <h2>Bad Words Setup</h2>
+
+    <form action="{% url 'admin-custom:bad-words-setup' %}" method="POST" class="form-horizontal">
+        {% csrf_token %}
+        <fieldset class="module aligned first">
+            <div class="control-group">
+                <div class="control-label">List of bad words:<br>(ordered alphabetically,<br>separated by new line)</div>
+                <div class="controls">
+                    <span class="help-inline"><b>[{{ bad_words_list|length }} bad words are in database]</b></span>
+                    <br />
+                    <textarea class="bad-words-textarea" name="newBadWordsText">{{ bad_words_list|join:"&#10;" }}</textarea>
+                    <br />
+                    <span class="help-inline"><b>Bad words in the list will be stripped and lowered before saving to database.</b></span>
+                </div>
+            </div>
+        </fieldset>
+        <br />
+        <button type="submit" class="btn btn-warning">Save</button>
+    </form>
+{% endblock %}

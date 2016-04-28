@@ -1,0 +1,3 @@
+#web: python eduapi/manage.py runserver 5001
+redis: redis-server
+celeryworker: celery worker --beat --workdir=eduapi/ --app=utils_app.celeryapp.app --loglevel=INFO

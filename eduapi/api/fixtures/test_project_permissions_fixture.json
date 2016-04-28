@@ -1,0 +1,363 @@
+[
+{
+    "fields": {
+        "name": "123dcircuits",
+        "permissions": []
+    },
+    "model": "auth.group",
+    "pk": 1
+},
+{
+    "fields": {
+        "name": "tinkercad",
+        "permissions": []
+    },
+    "model": "auth.group",
+    "pk": 2
+},
+{
+    "fields": {
+        "is_approved": false,
+        "updated": "2014-08-13T16:02:40.086Z",
+        "added": "2014-08-04T14:46:02.232Z",
+        "name": "John Doe",
+        "short_name": "John",
+        "oxygen_id": "222",
+        "is_verified_adult": false,
+        "is_child": false,
+        "is_active": true,
+        "is_superuser": false,
+        "is_staff": false,
+        "last_login": "2014-08-04T14:46:02.232Z",
+        "avatar": "http://placekitten.com/150/150",
+        "groups": [],
+        "member_id": "ABC123123123",
+        "user_permissions": [],
+        "password": "",
+        "email": "test@purplebit.com",
+        "description": ""
+    },
+    "model": "api.igniteuser",
+    "pk": 2
+},
+{
+    "fields": {
+        "is_approved": true,
+        "updated": "2014-08-13T16:02:40.086Z",
+        "added": "2014-08-04T14:46:02.232Z",
+        "name": "Jane Doe",
+        "short_name": "Jane",
+        "oxygen_id": "333",
+        "is_verified_adult": false,
+        "is_child": false,
+        "is_active": true,
+        "is_superuser": true,
+        "is_staff": false,
+        "last_login": "2014-08-04T14:46:02.232Z",
+        "avatar": "http://placekitten.com/150/150",
+        "groups": [],
+        "member_id": "1111111111111",
+        "user_permissions": [],
+        "password": "",
+        "email": "testjane@purplebit.com",
+        "description": ""
+    },
+    "model": "api.igniteuser",
+    "pk": 3
+},
+{
+    "fields": {
+        "is_approved": false,
+        "updated": "2014-08-13T16:25:47.120Z",
+        "added": "2014-08-13T16:23:28.423Z",
+        "name": "Ofir Ovadia",
+        "short_name": "Ofir Ovadia",
+        "oxygen_id": "444",
+        "is_verified_adult": false,
+        "is_child": false,
+        "is_active": true,
+        "is_superuser": false,
+        "is_staff": false,
+        "last_login": "2014-08-13T16:23:28.423Z",
+        "avatar": "http://beta.squidplatform.com/Images/v23/Member/default_avatar.png",
+        "groups": [],
+        "member_id": "20707763",
+        "user_permissions": [],
+        "password": "",
+        "email": "ofirov@gmail.com",
+        "description": ""
+    },
+    "model": "api.igniteuser",
+    "pk": 4
+},
+{
+    "fields": {
+        "is_approved": true,
+        "updated": "2014-08-13T16:02:40.086Z",
+        "added": "2014-08-04T14:46:02.232Z",
+        "name": "Darth Doe",
+        "short_name": "DD",
+        "oxygen_id": "555",
+        "is_verified_adult": false,
+        "is_child": false,
+        "is_active": true,
+        "is_superuser": false,
+        "is_staff": false,
+        "last_login": "2014-08-04T14:46:02.232Z",
+        "avatar": "http://placekitten.com/150/150",
+        "groups": [],
+        "member_id": "111111222222222",
+        "user_permissions": [],
+        "password": "",
+        "email": "testdd@purplebit.com",
+        "description": ""
+    },
+    "model": "api.igniteuser",
+    "pk": 5
+},
+{
+    "fields": {
+        "is_approved": false,
+        "updated": "2014-08-13T16:02:40.086Z",
+        "added": "2014-08-04T14:46:02.232Z",
+        "name": "Test User 6",
+        "short_name": "T6",
+        "oxygen_id": "666",
+        "is_verified_adult": false,
+        "is_child": false,
+        "is_active": true,
+        "is_superuser": false,
+        "is_staff": false,
+        "last_login": "2014-08-04T14:46:02.232Z",
+        "avatar": "http://placekitten.com/150/150",
+        "groups": [],
+        "member_id": "11111122222444",
+        "user_permissions": [],
+        "password": "",
+        "email": "testdd43132@purplebit.com",
+        "description": ""
+    },
+    "model": "api.igniteuser",
+    "pk": 6
+},
+{
+    "fields": {
+        "is_approved": false,
+        "updated": "2014-08-13T16:02:40.086Z",
+        "added": "2014-08-04T14:46:02.232Z",
+        "name": "Test User 7",
+        "short_name": "T7",
+        "oxygen_id": "777",
+        "is_verified_adult": false,
+        "is_child": true,
+        "is_active": true,
+        "is_superuser": false,
+        "is_staff": false,
+        "last_login": "2014-08-04T14:46:02.232Z",
+        "avatar": "http://placekitten.com/150/150",
+        "groups": [],
+        "member_id": "11111122222777",
+        "user_permissions": [],
+        "password": "",
+        "email": "testdd777@purplebit.com",
+        "description": ""
+    },
+    "model": "api.igniteuser",
+    "pk": 7
+},
+{
+    "fields": {
+        "is_approved": false,
+        "updated": "2014-08-13T16:02:40.086Z",
+        "added": "2014-08-04T14:46:02.232Z",
+        "name": "Verified Adult Test User 8",
+        "short_name": "T8",
+        "oxygen_id": "888",
+        "is_verified_adult": true,
+        "is_child": false,
+        "is_active": true,
+        "is_superuser": false,
+        "is_staff": false,
+        "last_login": "2014-08-04T14:46:02.232Z",
+        "avatar": "http://placekitten.com/150/150",
+        "groups": [],
+        "member_id": "11111122222888",
+        "user_permissions": [],
+        "password": "",
+        "email": "testdd888@purplebit.com",
+        "description": ""
+    },
+    "model": "api.igniteuser",
+    "pk": 8
+},
+{
+    "fields": {
+        "guardian": 2,
+        "updated": "2015-01-21T17:32:57.417Z",
+        "added": "2015-01-21T17:32:57.417Z",
+        "moderator_type": "parent",
+        "child": 3
+    },
+    "model": "api.childguardian",
+    "pk": 1
+},
+{
+    "fields": {
+        "guardian": 2,
+        "updated": "2015-01-21T17:32:57.417Z",
+        "added": "2015-01-21T17:32:57.417Z",
+        "moderator_type": "parent",
+        "child": 5
+    },
+    "model": "api.childguardian",
+    "pk": 2
+},
+{
+    "fields": {
+        "guardian": 4,
+        "updated": "2015-01-21T17:32:57.417Z",
+        "added": "2015-01-21T17:32:57.417Z",
+        "moderator_type": "educator",
+        "child": 3
+    },
+    "model": "api.childguardian",
+    "pk": 3
+},
+{
+    "fields": {
+        "guardian": 6,
+        "updated": "2015-01-21T17:32:57.417Z",
+        "added": "2015-01-21T17:32:57.417Z",
+        "moderator_type": "educator",
+        "child": 3
+    },
+    "model": "api.childguardian",
+    "pk": 4
+},
+{
+    "fields": {
+        "updated": "2014-07-30T08:35:47.573Z",
+        "added": "2014-07-07T14:34:35.620Z",
+        "description": "# Curriculum\r\n\r\nIn this project we'll learn how to fly a Super Star Destroyer. We'll have both theoretical and practical lessons on a Super Star Destroyer Mark XCVIII.\r\n\r\nThis is **by far** the *greatest* lesson _**evah**_!\r\n\r\n#### First lesson\r\n\r\ngoing all out.\r\n\r\n#### Second lesson\r\n\r\n1. Assembling the SSD101 crew\r\n2. Getting a spare engine (not issued by default with every SSD, but trust me, you want this).\r\n\r\n#### Third lesson\r\n\r\nKilling rebel scum.\r\n\r\n<a href=\"http://google.com\">Code injection</a>",
+        "license": "Public Domain",
+        "title": "Super Star Destroyer 101",
+        "age": "18+",
+        "tags": "",
+        "lock": 1,
+        "owner": 2,
+        "difficulty": "hard",
+        "card_image": "http://placekitten.com/230/230",
+        "banner_image": "http://placekitten.com/1000/300",
+        "duration": 45,
+        "teacher_additional_resources": "# Curriculum\n\nSee _Empire Fleet Standard Training Vol. XXIV, appendix B, section 37_.\n\n# Prerequisites\n\nThis project is for intermediate Empire Commanders.",
+        "publish_mode": "published"
+    },
+    "model": "api.project",
+    "pk": 1
+},
+{
+    "fields": {
+        "updated": "2014-07-30T08:35:47.573Z",
+        "added": "2014-07-07T14:34:35.620Z",
+        "description": "# Curriculum\r\n\r\nIn this project we'll learn how to fly a Super Star Destroyer. We'll have both theoretical and practical lessons on a Super Star Destroyer Mark XCVIII.\r\n\r\nThis is **by far** the *greatest* lesson _**evah**_!\r\n\r\n#### First lesson\r\n\r\ngoing all out.\r\n\r\n#### Second lesson\r\n\r\n1. Assembling the SSD101 crew\r\n2. Getting a spare engine (not issued by default with every SSD, but trust me, you want this).\r\n\r\n#### Third lesson\r\n\r\nKilling rebel scum.\r\n\r\n<a href=\"http://google.com\">Code injection</a>",
+        "license": "Public Domain",
+        "title": "Super Star Destroyer 102",
+        "age": "18+",
+        "tags": "",
+        "lock": 0,
+        "owner": 2,
+        "difficulty": "hard",
+        "card_image": "http://placekitten.com/230/230",
+        "banner_image": "http://placekitten.com/1000/300",
+        "duration": 45,
+        "teacher_additional_resources": "# Curriculum\n\nSee _Empire Fleet Standard Training Vol. XXIV, appendix B, section 37_.\n\n# Prerequisites\n\nThis project is for intermediate Empire Commanders.",
+        "publish_mode": "published"
+    },
+    "model": "api.project",
+    "pk": 2
+},
+{
+    "fields": {
+        "application": "tinkercad",
+        "updated": "2014-07-28T14:56:08.899Z",
+        "added": "2014-07-05T17:56:12.062Z",
+        "application_blob": "{\"id\":\"AJG-123123-ASDFS\"}",
+        "title": "Spacecraft Engines Mechanics",
+        "order": 2,
+        "project": 1,
+        "duration": 15
+    },
+    "model": "api.lesson",
+    "pk": 3
+},
+{
+    "fields": {
+        "updated": "2014-07-09T14:49:24.855Z",
+        "added": "2014-07-05T22:38:58.801Z",
+        "application_blob": "{\"test\":321,\"version\":\"2.7.8\",\"language\":\"python\",\"year\":2014}",
+        "description": "This will open the Python tutorial",
+        "title": "open the python tutorial",
+        "image": "",
+        "lesson": 3,
+        "order": 0
+    },
+    "model": "api.step",
+    "pk": 1
+},
+{
+    "fields": {
+        "application": "video",
+        "updated": "2014-07-28T14:55:03.392Z",
+        "added": "2014-07-09T12:27:03.807Z",
+        "application_blob": "{\"video\":{\"vendor\":\"youtube\",\"id\":\"1234567890a\"}}",
+        "title": "Interstellar Navigation",
+        "order": 0,
+        "project": 1,
+        "duration": 20
+    },
+    "model": "api.lesson",
+    "pk": 9
+},
+{
+    "fields": {
+        "application": "video",
+        "updated": "2014-07-28T14:55:36.223Z",
+        "added": "2014-07-28T14:55:36.223Z",
+        "application_blob": "{\"video\":{\"vendor\":\"youtube\",\"id\":\"1234567890a\"}}",
+        "title": "The Super Start Destroyer Crew",
+        "order": 1,
+        "project": 1,
+        "duration": 30
+    },
+    "model": "api.lesson",
+    "pk": 21
+},
+{
+    "fields": {
+        "application": "video",
+        "updated": "2014-07-28T14:56:45.646Z",
+        "added": "2014-07-28T14:56:45.646Z",
+        "application_blob": "{\"video\":{\"vendor\":\"youtube\",\"id\":\"1234567890a\"}}",
+        "title": "Rebel Combat History",
+        "order": 3,
+        "project": 1,
+        "duration": 20
+    },
+    "model": "api.lesson",
+    "pk": 22
+},
+{
+    "fields": {
+        "application": "video",
+        "updated": "2014-07-29T20:38:46.713Z",
+        "added": "2014-07-29T20:38:46.713Z",
+        "application_blob": "{\"video\": {\"vendor\":\"youtube\",\"id\":\"1234567890a\"}}",
+        "title": "Test",
+        "order": 4,
+        "project": 1,
+        "duration": 45
+    },
+    "model": "api.lesson",
+    "pk": 30
+}
+]

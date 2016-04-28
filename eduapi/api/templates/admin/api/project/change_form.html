@@ -1,0 +1,334 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_static admin_modify suit_tags admin_urls %}
+{% load url from future %}
+
+{% block extrahead %}{{ block.super }}
+  {% url 'admin:jsi18n' as jsi18nurl %}
+  <script type="text/javascript" src="{{ jsi18nurl|default:"../../../jsi18n/" }}"></script>
+    <script type="text/javascript" src="{% url 'admin:jsi18n' %}"></script>
+    <script type="text/javascript" src="{% static 'admin/libs/jquery.js' %}"></script>
+    <script type="text/javascript" src="{% static 'admin/libs/angular.js' %}"></script>
+    <script type="text/javascript" src="{% static 'admin/libs/ui-bootstrap-tpls.js' %}"></script>
+    <script type="text/javascript" src="{% static 'admin/libs/jquery.imgareaselect.dev.js' %}"></script>
+    <script type="text/javascript" src="{% static 'admin/libs/aws-sdk.js' %}"></script>
+    <script type="text/javascript" src="{% static 'admin/libs/file-picker.js' %}"></script>
+    <script type="text/javascript" src="{% static 'admin/scripts/app.js' %}"></script>
+    <script type="text/javascript" src="{% static 'admin/scripts/controllers/project-admin-ctrl.js' %}"></script>
+{{ media }}
+  {{ media }}
+
+{% endblock %}
+
+
+{% block extrajs %}
+  {{ block.super }}
+
+  {% if 'CONFIRM_UNSAVED_CHANGES'|suit_conf %}
+    <!-- Warn on leaving unsaved form -->
+    <script src="{% static 'suit/js/suit-form-confirm.js' %}"></script>
+    <script type="text/javascript">
+      confirmExitIfModified('{{ opts.module_name }}_form', '{% trans 'You have unsaved changes' %}.');
+    </script>
+  {% endif %}
+
+  {% if adminform.model_admin.suit_form_tabs %}
+    <script type="text/javascript">
+    (function ($) {
+      $(function () {
+        $('#suit_form_tabs').suit_form_tabs();
+      });
+    }(Suit.$))
+    </script>
+  {% endif %}
+        
+  <script>
+    (function ($) {
+      $(function () {
+        $("#{{ opts.module_name }}_form").suit_form_debounce();
+      });
+    }(Suit.$))    
+  </script>
+
+{% endblock %}
+
+{% block extrastyle %}{{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static  'admin/css/forms.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static  'admin/libs/file-picker.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static  'admin/libs/imgareaselect/css/imgareaselect-animated.css' %}" />
+{% endblock %}
+
+{% block content_title_value %}
+  {% trans 'Add' %} {{ opts.verbose_name }}
+{% endblock %}
+
+{% block coltype %}{% if ordered_objects %}colMS{% else %}colM{% endif %}{% endblock %}
+
+{% block bodyclass %}{{ opts.app_label }}-{{ opts.object_name.lower }} change-form{% endblock %}
+
+{% if not is_popup %}
+  {% block breadcrumbs %}
+    <ul class="breadcrumb">
+      <li>
+        <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+        <span class="divider">&raquo;</span>
+      </li>
+      <li>
+        <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{% firstof opts.app_config.verbose_name app_label|capfirst|escape %}</a>
+        <span class="divider">&raquo;</span>
+      </li>
+      <li>
+        {% if has_change_permission %}
+          <a href="{% url opts|admin_urlname:'changelist' %}">
+            {{ opts.verbose_name_plural|capfirst }}</a>{% else %}
+          {{ opts.verbose_name_plural|capfirst }}{% endif %}
+        <span class="divider">&raquo;</span>
+      </li>
+      <li class="active">
+        {% if add %}{% trans 'Add' %} {{ opts.verbose_name }}{% else %}{{ original|truncatewords:"18" }}{% endif %}
+      </li>
+    </ul>
+  {% endblock %}
+{% endif %}
+
+{% block content %}
+  <div id="content-main" class="inner-two-columns">
+
+    <form {% if has_file_field %}enctype="multipart/form-data" {% endif %}action="{{ form_url }}" method="post"
+          id="{{ opts.module_name }}_form" class="form-horizontal">
+
+      <div class="inner-right-column">
+
+        <div class="box save-box">
+
+          {% block submit_buttons_bottom %}{% submit_row %}{% endblock %}
+
+        </div>
+
+        {% block object-tools %}
+          {% if change %}{% if not is_popup %}
+            <h4 class="italic-title">{% trans 'tools'|capfirst %}</h4>
+            <ul class="box menu-box">
+              {% block object-tools-items %}
+                <li><a href="history/" class="historylink"><i
+                    class="icon-time icon-alpha75"></i>{% trans "History" %}</a>
+                </li>
+                {% if has_absolute_url %}
+                  <li>
+                    <a href="{{ original.get_absolute_url }}" class="viewsitelink"><i class="icon-eye-open icon-alpha75"></i>{% trans "View on site" %}</a>
+                  </li>
+                {% endif %}
+
+                {% if has_add_permission %}
+                  <li>
+                    <a href="../add/"><i class="icon-plus-sign icon-alpha75"></i>{% blocktrans with opts.verbose_name as name %}Add {{ name }}{% endblocktrans %}
+                    </a></li>
+                  {# {% blocktrans with cl.opts.verbose_name as name %}Add {{ name }}{% endblocktrans %}</a>#}
+                {% endif %}
+
+              {% endblock %}
+            </ul>
+          {% endif %}{% endif %}
+        {% endblock %}
+
+      {% block sidebar %}{% endblock %}
+
+      </div>
+      <div class="inner-center-column">
+        {% csrf_token %}{% block form_top %}{% endblock %}
+        {% block suit_form_tabs %}
+          {% if adminform.model_admin.suit_form_tabs %}
+            <ul id="suit_form_tabs" class="nav nav-tabs nav-tabs-suit" data-tab-prefix="suit-tab">
+              {% for tab in adminform.model_admin.suit_form_tabs %}
+                <li><a href="#{{ tab.0 }}">{{ tab.1 }}</a></li>{% endfor %}
+            </ul>
+          {% endif %}
+        {% endblock %}
+        <div class="tab-content tab-content-main">
+          {% if is_popup %}
+            <input type="hidden" name="_popup" value="1"/>{% endif %}
+          {% if errors %}
+            <div class="alert alert-error">
+              {% blocktrans count counter=errors|length %}Please correct the error below.{% plural %} Please correct the errors below.{% endblocktrans %}
+              {{ adminform.form.non_field_errors }}
+            </div>
+          {% endif %}
+
+          {# render suit_form_includes at top position #}
+          {% include 'suit/includes/change_form_includes.html' with position='top' %}
+
+          {% block field_sets %}
+            {% for fieldset in adminform %}
+              {% load suit_tags %}
+                <fieldset ng-app="adminApp" class="module aligned{{ fieldset.name|yesno:' with-legend, first' }} {{ fieldset.classes }}">
+                    {% if fieldset.name %}
+                        <h2 class="legend">{{ fieldset.name }}
+                            {% if fieldset.description %}
+                                <span class="description">{{ fieldset.description|safe }} AAA</span>
+                            {% endif %}
+                        </h2>{% endif %}
+                  {% for line in fieldset %}
+                    {% with singlefield=line.fields|length_is:'1' %}
+                      <div  ng-controller="ProjectAdminCtrl" class="control-group form-row{% if line.errors %} {{ singlefield|yesno:'error,first-error' }} errors{% endif %}{% for field in line %}{% if field.field.name %} field-{{ field.field.name }}{% endif %} {{ field.field.field.widget.attrs.rowclass }}{% endfor %}{{ singlefield|yesno:',multi-field-row' }}">
+                        {% for field in line %}
+                            {% spaceless %}
+                            {% if field.field.name == "banner_image" %}
+                                <div id="bannerImageDiv" >
+                                    {% if not line.fields|length_is:'1' and not field.is_readonly %}{{ field.errors }}{% endif %}
+                                        <div class="control-label">
+                                            {{ field.label_tag }}
+                                        </div>
+                                        {{ field.field }}
+                                        <!-- Load new pic to s3 -->
+                                        <file-select-modal
+                                                ng-model="bannerImgUrl"
+                                                button-text="Upload Banner Image"
+                                                button-icon="fa fa-plus"
+                                                file-picker-options="projectBannerFilePickerOptions"
+                                                image-area-select-options="projectBannerImageAreaSelectOptions"
+                                                image-options="projectBannerImageOptions"
+                                                button-class="btn btn-default picture-button center-content-bottom"
+                                                ok-button-class="btn btn-ignite btn-ignite-inverted"
+                                                cancel-button-class="btn btn-ignite">
+                                        </file-select-modal>
+                                    {% if field.field.help_text %}
+                                        <p class="help">{{ field.field.help_text|safe }}</p>
+                                    {% endif %}
+                                </div>
+                            {% elif field.field.name == "card_image" %}
+                                <div id="cardImageDiv">
+                                    {% if not line.fields|length_is:'1' and not field.is_readonly %}{{ field.errors }}{% endif %}
+                                        <div class="control-label">
+                                            {{ field.label_tag }}
+                                        </div>
+                                        {{ field.field }}
+                                        <!-- Load new pic to s3 -->
+                                        <file-select-modal
+                                                ng-model="cardImgUrl"
+                                                button-text="Upload Card Image"
+                                                button-icon="fa fa-plus"
+                                                file-picker-options="projectCardImageFilePickerOptions"
+                                                image-area-select-options="projectCardImageAreaSelectOptions"
+                                                image-options="projectCardImageOptions"
+                                                button-class="btn btn-default picture-button center-content-bottom"
+                                                ok-button-class="btn btn-ignite btn-ignite-inverted"
+                                                cancel-button-class="btn btn-ignite">
+                                        </file-select-modal>
+                                    {% if field.field.help_text %}
+                                        <p class="help">{{ field.field.help_text|safe }}</p>
+                                    {% endif %}
+                                </div>
+                            {% else %}
+
+                                {# write special control tags only for first multi field #}
+                                {% if forloop.first %}
+                                    <div{% if not singlefield %}
+                                        class="field-box{% if field.field.name %} field-{{ field.field.name }}{% endif %}"{% endif %}>
+
+                                    <div class="control-label">
+                                        {{ field.label_tag }}
+                                    </div>
+                                    <div class="controls">
+                                    {# if multi-fields and first field #}
+                                    {% if not singlefield %}
+                                      <div class="multi-field-box">
+                                    {% endif %}
+                                {% else %}
+                                  {# If multi-fields and not first wrap also label #}
+                                  {% if not singlefield and not forloop.first %}
+                                    <div class="multi-field-box{{ field.errors|yesno:' error,' }}">
+                                  {% endif %}
+                                    {{ field.label_tag }}
+                                {% endif %}
+
+                                {% if not field.is_readonly and field.errors %}<div class="inline error errors">{% endif %}
+
+                                {# If multi-fields and wrap controls too #}
+                                 {% if not singlefield %}
+                                    <div class="multi-field-controls">
+                                  {% endif %}
+
+                                {% if field.is_readonly %}
+                                    <span class="readonly">{{ field|field_contents_foreign_linked }}</span>
+                                {% else %}
+                                    {{ field.field }}
+                                {% endif %}
+
+                                {# For single field errors#}
+                                {% if singlefield and line.errors %}
+                                    <span class="help-inline">{{ line.errors }}</span>
+                                {% endif %}
+
+                                {# For multi field errors #}
+                                {% if field.errors and not singlefield and not field.is_readonly %}
+                                  <span class="help-block">{{ field.errors|striptags }}</span>
+                                {% endif %}
+
+                                {% if field.field.help_text %}
+                                  <span class="{% if line.errors or field.errors or not singlefield %}help-block{% else %}help-inline{% endif %}">{{ field.field.help_text|safe }}</span>
+                                {% endif %}
+
+                                {% if not field.is_readonly and field.errors %}</div>{% endif %}
+
+                                {% if not singlefield %}
+                                 </div> {# close multi-controls #}
+                                 </div> {# close multi-field-box #}
+                                {% endif %}
+
+                                {% if forloop.last %}
+                                    </div>
+                                    </div>
+                                {% endif %}
+
+
+                            {% endif %}
+                          {% endspaceless %}
+                        {% endfor %}
+
+                      </div>
+                    {% endwith %}
+                  {% endfor %}
+                </fieldset>
+                {# For closing line #}
+                {% if 'plugin-holder' in fieldset.classes %}
+                  <hr class="plugin-holder-separator">
+                {% endif %}
+
+            {% endfor %}
+          {% endblock %}
+
+          {% block after_field_sets %}{% endblock %}
+
+          {# render suit_form_includes at middle position #}
+          {% include 'suit/includes/change_form_includes.html' with position='middle' %}
+
+          {% block inline_field_sets %}
+            {% for inline_admin_formset in inline_admin_formsets %}
+              {% include inline_admin_formset.opts.template %}
+            {% endfor %}
+          {% endblock %}
+
+        </div>
+
+        {% block after_related_objects %}{% endblock %}
+
+        {# render suit_form_includes at last position #}
+        {% include 'suit/includes/change_form_includes.html' with position='bottom' %}
+
+        {% if adminform and add %}
+          <script type="text/javascript">
+            (function ($) {
+              $('form#{{ opts.module_name }}_form :input[type!=button][type!=submit]:visible:enabled:first').focus();
+            })(django.jQuery);
+          </script>
+        {% endif %}
+
+        {# JavaScript for prepopulated fields #}
+        {% prepopulated_fields_js %}
+
+      </div>
+    </form>
+  </div>
+{% endblock %}
+
+{# Empty centered sidebar as now we use sidebar in content block#}
+{% block sidebar_content %}{% endblock %}

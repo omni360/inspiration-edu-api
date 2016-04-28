@@ -1,0 +1,206 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls admin_static admin_list %}
+
+{% block extrahead %}
+    {{ block.super }}
+    {{ moderation_media }}
+{% endblock %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <style type="text/css">
+        .children-bulk { width: 400px; height: 200px; }
+        .children-list-table { table-layout: fixed; }
+        .children-list-table > tbody > tr > td { padding: 5px 10px; }
+        .children-list-table > tbody > tr > td.child-username { font-weight: bold; }
+        .children-list-table > tbody > tr > td.child-lookup { font-style: italic; }
+        .children-list-table > tbody > tr > td.child-info { color: #999; }
+        .children-list-table > tbody > tr > td.child-remove { text-align: right; color: #999; }
+        .children-list-table > tbody > tr > td.child-moderator-type {}
+        .children-list-table > tbody > tr > td.child-status { color: #999; }
+        .children-list-table > tbody > tr.error > td.child-username { font-weight: normal; }
+        .children-list-table select { width: 100%; }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <h2>Moderator</h2>
+    {% if guardian %}
+        <div class="form-horizontal">
+            <fieldset class="module aligned first">
+                <div class="control-group">
+                    <div class="control-label">Moderator:</div>
+                    <div class="controls">
+                        <h4>{{ guardian.name }}</h4>
+                        <a href="{% url 'admin-custom:coppa-moderation' %}">[cancel and change moderator]</a>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+    {% else %}
+        <form action="{% url 'admin-custom:coppa-moderation' %}" method="GET" class="form-horizontal">
+            <fieldset class="module aligned first">
+                <div class="control-group">
+                    <div class="control-label">Lookup a moderator:</div>
+                    <div class="controls">
+                        {{ search_guardian_field }}
+                        <button type="submit" class="btn">Search</button>
+                    </div>
+                </div>
+            </fieldset>
+        </form>
+    {% endif %}
+
+    <br>
+
+    {% if guardian %}
+    <h2>Children</h2>
+
+    {% if post_operation == None %}
+        <form action="{% url 'admin-custom:coppa-moderation' %}?guardian_id={{ guardian.id }}&op=bulk" method="POST" class="form-horizontal">
+            {% csrf_token %}
+            <fieldset class="module aligned first">
+                <div class="control-group">
+                    <div class="control-label"><label class="required" for="moderatorType">Choose moderator type:</div>
+                    <div class="controls">
+                        {% for moderator_type_code, moderator_type_display in moderator_types_choices %}
+                            <label class="radio inline"><input type="radio" name="moderatorType" value="{{ moderator_type_code }}" {% if moderator_type == moderator_type_code %}checked="checked"{% endif %}> {{ moderator_type_display }}</label>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="control-label">List of children to add to moderator (separated by comma or new line):</div>
+                    <div class="controls">
+                        <textarea class="children-bulk" name="newChildrenBulk"></textarea>
+                    </div>
+                </div>
+            </fieldset>
+            <br>
+            <button type="submit" class="btn btn-warning">Next (Preview)</button>
+        </form>
+    {% elif post_operation == 'bulk' %}
+        <form action="{% url 'admin-custom:coppa-moderation' %}?guardian_id={{ guardian.id }}&op=confirm" method="POST" class="form-horizontal">
+            {% csrf_token %}
+            <fieldset class="module aligned first">
+                <div class="control-group">
+                    <div class="control-label"><label class="required" for="moderatorType">Choose moderator type:</div>
+                    <div class="controls">
+                        {% for moderator_type_code, moderator_type_display in moderator_types_choices %}
+                            <label class="radio inline"><input type="radio" name="moderatorType" value="{{ moderator_type_code }}" {% if moderator_type == moderator_type_code %}checked="checked"{% endif %}> {{ moderator_type_display }}</label>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="control-label">Children found:</div>
+                    <div class="controls">
+                        <table id="new_children_list" class="table table-bordered children-list-table">
+                        <thead>
+                        <tr>
+                            <th style="width: 25%;">User Name</th>
+                            <th style="width: 25%;">Lookup</th>
+                            <th style="width: 40%;">Info</th>
+                            <th style="width: 10%;">Remove</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for new_child_lookup, new_child_found in new_children_search_output %}
+                        {% with new_child_found_len=new_child_found|length new_child=new_child_found.0 %}
+                        <tr class="{% if new_child_found_len == 0 %}error{% elif new_child_found_len > 1 %}warning{% endif %}">
+                            <td class="child-username">
+                                {% if new_child_found_len > 1 %}
+                                    <select name="newChildrenIds[]" required>
+                                        <option value="">Please Select</option>
+                                    {% for new_child in new_child_found %}
+                                        <option value="{{ new_child.id }}">{{ new_child.name }}</option>
+                                    {% endfor %}
+                                    </select>
+                                {% elif new_child_found_len == 1 %}
+                                    <input type="hidden" name="newChildrenIds[]" value="{{ new_child.id }}">
+                                    <span>{{ new_child.name }}</span>
+                                {% else %}
+                                    Not found
+                                {% endif %}
+                            </td>
+                            <td class="child-lookup">
+                                {{ new_child_lookup }}
+                            </td>
+                            <td class="child-info">
+                                {% if new_child_found_len == 1 %}
+                                    {% if guardian.id in new_child.guardians %}
+                                        NOTE: This child is already moderated by this moderator, as {{ new_child.moderator_type }}.
+                                    {% elif not new_child.isChild %}
+                                        User is not a child.
+                                    {% elif new_child.guardians|length > 1 %}
+                                        Note this child already has {{ new_child.guardians|length }} other moderators.
+                                    {% endif %}
+                                {% elif new_child_found_len > 1 %}
+                                    Found {{ new_child_found_len }} users.<br>
+                                    Select the one you were referring to.
+                                {% else %}
+                                    IGNORED: No child matched the lookup.
+                                {% endif %}
+                            </td>
+                            <td class="child-remove">
+                                <a href="javascript:;" onclick="javascript:$(this).closest('tr').remove();">[X]</a>
+                            </td>
+                        </tr>
+                        {% endwith %}
+                        {% endfor %}
+                        </tbody>
+                        </table>
+                    </div>
+                </div>
+            </fieldset>
+            <br>
+            <button type="submit" class="btn btn-success">Confirm</button>
+        </form>
+    {% elif post_operation == 'confirm' %}
+        <div class="form-horizontal">
+            <fieldset class="module aligned first">
+                <div class="control-group">
+                    <div class="control-label">Children confirmed:</div>
+                    <div class="controls">
+                        {% if new_children_confirm_output != None %}
+                            <table class="table table-bordered children-list-table">
+                            <thead>
+                            <tr>
+                                <th style="width: 25%;">User Name</th>
+                                <th style="width: 25%;">Moderator Type</th>
+                                <th style="width: 50%;">Status</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for new_child_confirm in new_children_confirm_output %}
+                            <tr class="{{ new_child_confirm.oxygen_response.state|lower }}">
+                                <td class="child-username">
+                                    {{ new_child_confirm.name }}
+                                </td>
+                                <td class="child-moderator-type">
+                                    {{ new_child_confirm.moderator_type }}
+                                </td>
+                                <td class="child-status">
+                                    {% if new_child_confirm.oxygen_response.state == 'SUCCESS' %}
+                                        OK
+                                    {% elif new_child_confirm.oxygen_response.state == 'ERROR' %}
+                                        FAIL: {{ new_child_confirm.oxygen_response.message }}
+                                    {% elif new_child_confirm.oxygen_response.state == 'WARNING' %}
+                                        WARNING: {{ new_child_confirm.oxygen_response.message }}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                            </table>
+                        {% else %}
+                            Operation Failed!
+                        {% endif %}
+                    </div>
+                </div>
+            </fieldset>
+            <br>
+            <a href="{% url 'admin-custom:coppa-moderation' %}" class="btn btn-default">Start Again</a>
+        </div>
+    {% endif %}
+
+    {% endif %}
+{% endblock %}

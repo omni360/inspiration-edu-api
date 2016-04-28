@@ -1,0 +1,2 @@
+web: newrelic-admin run-program gunicorn --workers=4 --bind=0.0.0.0:$PORT --pythonpath eduapi eduapi.wsgi
+celeryworker: celery worker --beat --workdir=eduapi/ --app=utils_app.celeryapp.app --loglevel=INFO
