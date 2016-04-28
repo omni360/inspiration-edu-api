@@ -1,0 +1,12 @@
+*.log
+*.pot
+*.pyc
+.pydevproject
+.project
+.idea
+venv
+dump.rdb
+.DS_Store
+eduapi/.coverage
+celerybeat-schedule.db
+herokukey*
